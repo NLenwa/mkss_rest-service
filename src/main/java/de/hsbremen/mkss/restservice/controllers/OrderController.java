@@ -3,6 +3,7 @@ package de.hsbremen.mkss.restservice.controllers;
 import java.util.*;
 
 import de.hsbremen.mkss.restservice.entity.LineItem;
+import de.hsbremen.mkss.restservice.entity.OrderState;
 import de.hsbremen.mkss.restservice.repository.LineItemRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,24 +71,35 @@ public class OrderController {
     public ResponseEntity<LineItem> addLineItem(@RequestParam String Product_Name, @RequestParam float Price, @RequestParam int Quantity, @PathVariable long orderId) throws Exception {
         oorder order = repository.findById(orderId).orElseThrow(Exception::new);
 
+        if (order.getState() == OrderState.EMPTY || order.getState() == OrderState.IN_PREPARATION) {
             LineItem item = new LineItem();
             item.setProductName(Product_Name);
             item.setPrice(Price);
             item.setQuantity(Quantity);
             item.setOrder(order);
 
+            order.setState(OrderState.IN_PREPARATION);
             repository.save(order);
             lineItemRepository.save(item);
             return ResponseEntity.ok(item);
-
+        }
+        else {
+            throw new Exception();
+        }
     }
 
     //Removing a line item from an order
     @DeleteMapping("/order/{id}/item/{itemId}")
-    void removeLineItem(@PathVariable long id, @PathVariable long itemId) throws Exception{
+    void removeLineItem(@PathVariable long id, @PathVariable long itemId) throws Exception {
         oorder order = repository.findById(id).orElseThrow(Exception::new);
         order.removeItem(itemId);
-        repository.save(order);
+        if (order.getState() == OrderState.IN_PREPARATION) {
+            lineItemRepository.delete(lineItemRepository.findById(itemId).orElseThrow(Exception::new));
+            if (order.getItems().isEmpty()) {
+                order.setState(OrderState.EMPTY);
+            }
+            repository.save(order);
+        }
     }
 
 
@@ -96,4 +108,26 @@ public class OrderController {
     void deleteOrder(@PathVariable Long id) {
         repository.deleteById(id);
     }
+    // Purchasing (commit)
+    @PostMapping("/order/{id}/commit")
+    public ResponseEntity<oorder> commitOrder(@PathVariable long id) throws Exception
+    {
+        oorder order = repository.findById(id).orElseThrow(Exception::new);
+        if(order.getState() == OrderState.IN_PREPARATION)
+        {
+            order.setState(OrderState.COMMITTED);
+            repository.save(order);
+            return ResponseEntity.ok(order);
+        }
+        else if ( order.getState() == OrderState.COMMITTED || order.getState() == OrderState.ACCEPTED || order.getState() == OrderState.REJECTED)
+        {
+            throw new Exception();
+        }
+        else if(order.getState() == OrderState.EMPTY)
+        {
+            throw new Exception();
+        }
+        throw new Exception();
+    }
+
 }

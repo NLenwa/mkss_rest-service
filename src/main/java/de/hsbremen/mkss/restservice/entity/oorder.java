@@ -22,7 +22,7 @@ public class oorder {
     @Getter
     @Setter
     @NonNull
-    @DateTimeFormat(pattern = "dd.MM.yyyy")
+    @DateTimeFormat(pattern = "dd.mm.yyyy")
     @Column(name = "date")
     private Date date;
 
@@ -31,6 +31,13 @@ public class oorder {
     @NonNull
     @Column(name = "customer_Name")
     private String customerName;
+
+
+    @Getter
+    @Setter
+    @Column(name = "state")
+    @Enumerated(EnumType.STRING)
+    private OrderState state = OrderState.EMPTY;
 
     @OneToMany(mappedBy = "Order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 

@@ -49,7 +49,6 @@ public class LineItem {
     @JsonIgnore
     private oorder Order;
 
-
 }
 
 
