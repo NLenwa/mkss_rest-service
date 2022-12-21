@@ -2,6 +2,8 @@ package de.hsbremen.mkss.restservice.entity;
 
 import io.micrometer.common.lang.NonNull;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 import java.util.Set;
@@ -10,28 +12,36 @@ import java.util.Set;
 @Table(name = "oorder")
 public class oorder {
 
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Getter
+    @Setter
     @NonNull
     @DateTimeFormat(pattern = "dd.MM.yyyy")
     @Column(name = "date")
     private Date date;
 
+    @Getter
+    @Setter
     @NonNull
     @Column(name = "customer_Name")
     private String customerName;
 
-    @OneToMany(mappedBy = "oorder", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "Order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 
+    @Getter
+    @Setter
     private Set<LineItem> items;
 
-    public void addLineItem(LineItem item)
-    {
-        items.add(item);
-    }
+//    public void addLineItem(LineItem item)
+//    {
+//        items.add(item);
+//    }
 
     public void removeItem(long itemId)
     {
