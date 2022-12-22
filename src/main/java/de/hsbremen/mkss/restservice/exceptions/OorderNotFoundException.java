@@ -1,4 +1,4 @@
-package de.hsbremen.mkss.restservice.entity;
+package de.hsbremen.mkss.restservice.exceptions;
 
 public class OorderNotFoundException extends RuntimeException {
 
